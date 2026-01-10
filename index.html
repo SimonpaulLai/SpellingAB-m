@@ -414,7 +414,8 @@
             
             <div class="tutorial-step">
                 <span class="step-title">1. Start Game</span>
-                <span class="step-desc">Select a difficulty level and press <b>BEGIN</b>. A hint will appear.</span>
+                <span class="step-desc">Select a difficulty level and press <b>BEGIN</b>.</span>
+                 <span class="step-desc">A hint will appear.</span>
             </div>
 
             <div class="tutorial-step">
@@ -538,7 +539,7 @@
             renderKeyboard(); 
             
             document.getElementById('hint-display').innerHTML = 
-                `<span class="hint-val">Hint | PoS: ${targetWordObj.PoS}< / ZH: ${targetWordObj.Translation}</span>`;
+                `<span class="hint-val">Hint | PoS: ${targetWordObj.PoS} / ZH: ${targetWordObj.Translation}</span>`;
 
             const board = document.getElementById('answer-board');
             board.innerHTML = '';
