@@ -17,7 +17,6 @@
             
             /* 狀態色 */
             --blue: #3b82f6;
-            --blue-glow: rgba(59, 130, 246, 0.6);
             --yellow: #eab308;
             --red: #ef4444;
             --red-bg: #dc2626;
@@ -28,7 +27,7 @@
             --text-highlight: #60a5fa;
 
             /* 勝利金色 */
-            --win-gold: #FFD700;
+            --win-gold: #FFD700; 
             --win-glow: rgba(255, 215, 0, 0.6);
         }
 
@@ -40,34 +39,32 @@
             background-color: var(--bg-body);
             color: var(--text-white);
             font-family: 'Roboto', sans-serif;
-            
-            /* 關鍵佈局：佔滿螢幕，分為「主內容(1fr)」與「Footer(auto)」 */
+            /* 關鍵：使用 Flex column 佈局來分配高度 */
             height: 100dvh;
-            display: grid;
-            grid-template-rows: 1fr auto; 
+            display: flex;
+            flex-direction: column;
             overflow: hidden;
         }
 
-        /* --- 上半部：遊戲主區 --- */
+        /* --- 上半部：主內容區 (佔滿剩下空間) --- */
         .main-area {
+            flex: 1; /* 吃掉所有空間 */
             display: flex;
-            align-items: center;     /* 垂直置中 */
-            justify-content: center; /* 水平置中 */
-            padding: 10px;
+            align-items: center;
+            justify-content: center;
+            padding: 15px;
             width: 100%;
-            height: 100%;
-            overflow: hidden; /* 防止內容撐開導致 Footer 跑掉 */
+            overflow: hidden;
         }
 
         /* --- 卡片本體 --- */
         .game-card {
             background-color: var(--card-bg);
-            
-            /* 讓卡片盡可能大，但留有呼吸空間 */
-            width: 95%;
+            width: 100%;
             max-width: 420px;
-            /* 高度限制：不要超過父容器的高度 (也就是扣除 footer 後的高度) */
-            max-height: 100%; 
+            /* 讓卡片盡量拉長，但不要貼邊 */
+            height: 100%; 
+            max-height: 850px; /* 大螢幕限制 */
             
             padding: 20px;
             border-radius: 24px;
@@ -75,51 +72,53 @@
             
             display: flex;
             flex-direction: column;
+            /* 這裡很重要：讓內容分散對齊，撐開高度 */
+            justify-content: space-between; 
             align-items: center;
-            justify-content: center; /* 內容垂直分佈 */
             
             position: relative;
             animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            
-            /* 讓內容如果真的太長可以捲動，但在手機上通常設計為剛好塞滿 */
-            overflow-y: auto; 
         }
 
         @keyframes popIn {
-            from { opacity: 0; transform: scale(0.9); }
+            from { opacity: 0; transform: scale(0.95); }
             to { opacity: 1; transform: scale(1); }
         }
 
-        /* --- 標題 --- */
+        /* --- 頂部區塊 (標題+格子+Hint) --- */
+        .top-section {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            /* 防止被壓縮 */
+            flex-shrink: 0; 
+        }
+
         h1 {
             font-family: 'Orbitron', sans-serif;
-            margin: 0 0 10px 0;
-            font-size: 1.6rem;
+            margin: 0 0 15px 0;
+            font-size: 1.8rem;
             letter-spacing: 2px;
-            text-align: center;
             background: linear-gradient(to right, #fff, #a5b4fc);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
-            flex-shrink: 0; /* 防止標題被壓縮 */
         }
 
-        /* --- 答案框框區 --- */
         #answer-board {
             display: flex;
             gap: 6px;
-            margin-bottom: 8px;
+            margin-bottom: 10px;
             justify-content: center;
             flex-wrap: wrap;
             width: 100%;
-            min-height: 50px;
-            flex-shrink: 0;
         }
 
         .slot {
-            width: 44px; /* 預設，JS會改 */
+            width: 44px;
             height: 52px;
             background-color: var(--slot-empty);
-            border-radius: 8px;
+            border-radius: 10px;
             display: flex;
             justify-content: center;
             align-items: center;
@@ -130,72 +129,65 @@
             color: var(--text-white);
             
             border: 2px solid transparent;
-            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: all 0.15s ease; /* 加快反應速度 */
             text-transform: uppercase;
             box-shadow: 0 4px 6px rgba(0,0,0,0.2);
         }
 
-        /* 狀態顏色 */
         .slot.blue { background-color: var(--blue); border-color: rgba(255,255,255,0.2); }
         .slot.yellow { background-color: var(--yellow); color: #1e232e; } 
-        .slot.red { background-color: var(--red-bg); opacity: 0.7; }
+        .slot.red { background-color: var(--red-bg); opacity: 0.8; }
         
-        /* 虛線框 (提示還有更多) */
+        /* 虛線框 */
         .slot.multi-occur { border: 2px dashed rgba(255, 255, 255, 0.8) !important; }
 
-        /* --- 勝利特效 (金色跳動) --- */
+        /* --- 勝利特效 (金底白字) --- */
         @keyframes winner-jump {
             0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-10px); }
+            50% { transform: translateY(-12px); }
         }
         
         .slot.winner-anim {
             animation: winner-jump 0.6s ease;
-            background-color: var(--win-gold) !important; /* 金色 */
-            color: #1e232e !important; /* 金底黑字 */
+            background-color: var(--win-gold) !important; 
+            color: #ffffff !important; /* 強制白字 */
+            text-shadow: 0 1px 2px rgba(0,0,0,0.3); /* 增加白字可讀性 */
             box-shadow: 0 0 25px var(--win-glow);
             border-color: #fff !important;
         }
 
-        /* --- Hint --- */
         .hint-area {
-            font-size: 0.8rem;
+            font-size: 0.85rem;
             color: var(--text-gray);
-            margin-bottom: 15px;
+            margin-bottom: 10px;
             text-align: center;
             line-height: 1.4;
-            min-height: 2.2em;
-            flex-shrink: 0;
+            min-height: 1.5em;
         }
         .hint-val { color: var(--text-highlight); font-weight: bold; }
 
-        /* --- 鍵盤顯示板 --- */
+        /* --- 中間區塊 (鍵盤) --- */
         #keyboard-display {
             display: flex;
             flex-direction: column;
             gap: 5px;
-            margin-bottom: 15px;
             width: 100%;
-            flex-shrink: 1; /* 允許鍵盤在高度不夠時稍微壓縮間距(通常不會) */
+            flex-shrink: 0; /* 不要壓縮鍵盤 */
+            margin-bottom: 15px;
         }
         
-        .kb-row { 
-            display: flex; 
-            justify-content: center; 
-            gap: 4px; 
-            width: 100%;
-        }
+        .kb-row { display: flex; justify-content: center; gap: 4px; width: 100%; }
         
         .kb-key {
             flex: 1;
             max-width: 38px;
-            height: 40px;
+            height: 42px; /* 稍微加大一點 */
             background-color: var(--slot-empty);
-            border-radius: 5px;
+            border-radius: 6px;
             display: flex;
             justify-content: center;
             align-items: center;
-            font-size: 13px;
+            font-size: 14px;
             font-weight: bold;
             color: #718096;
             transition: background-color 0.2s;
@@ -205,13 +197,15 @@
         .kb-key.active-yellow { background-color: var(--yellow); color: #1e232e; }
         .kb-key.active-red { background-color: var(--red); opacity: 0.3; }
 
-        /* --- 控制區 --- */
+        /* --- 底部控制區 (彈性伸展核心) --- */
         .control-group {
             width: 100%;
             display: flex;
             flex-direction: column;
-            gap: 10px;
-            margin-top: auto; /* 推到底部 */
+            gap: 12px;
+            /* 讓這塊區域吃掉剩下的所有高度 */
+            flex-grow: 1; 
+            min-height: 0; /* 防止溢出 */
         }
 
         .level-select {
@@ -219,18 +213,26 @@
             grid-template-columns: repeat(3, 1fr);
             gap: 8px;
             width: 100%;
+            /* 讓按鈕群組也能長高 */
+            flex-grow: 1;
         }
 
         .lvl-btn {
             background-color: transparent;
             border: 1px solid #334155;
             color: #64748b;
-            padding: 8px 0;
-            border-radius: 8px;
-            font-size: 0.85rem;
+            /* 高度改為 100% 讓它自動填滿 grid 的高度 */
+            height: 100%; 
+            min-height: 45px; /* 最小高度保護 */
+            border-radius: 12px;
+            font-size: 0.95rem;
             font-weight: bold;
             cursor: pointer;
             transition: all 0.2s;
+            /* 讓文字置中 */
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
         
         .lvl-btn.selected {
@@ -245,10 +247,13 @@
             background-color: var(--btn-red);
             color: white;
             border: none;
-            padding: 14px;
-            font-size: 1.1rem;
+            /* Begin 按鈕固定高度，不要太高以免像磚塊 */
+            height: 60px; 
+            flex-shrink: 0;
+            
+            font-size: 1.2rem;
             font-weight: 700;
-            border-radius: 12px;
+            border-radius: 16px;
             cursor: pointer;
             font-family: 'Orbitron', sans-serif;
             letter-spacing: 1.5px;
@@ -256,15 +261,15 @@
         }
         #begin-btn:active { transform: scale(0.98); }
 
-        /* --- Footer (固定底部) --- */
+        /* --- Footer --- */
         footer {
-            padding: 15px 10px;
+            padding: 12px 10px;
             text-align: center;
             color: #475569;
             font-size: 0.65rem;
             line-height: 1.5;
-            background-color: var(--bg-body); /* 確保背景一致 */
-            z-index: 10;
+            background-color: var(--bg-body);
+            flex-shrink: 0;
         }
 
         #hidden-input { position: absolute; opacity: 0; top: -9999px; }
@@ -274,16 +279,19 @@
 
     <div class="main-area">
         <div class="game-card">
-            <h1>Spelling AB</h1>
+            
+            <div class="top-section">
+                <h1>Spelling AB</h1>
 
-            <div id="answer-board">
-                <div class="slot">?</div>
-                <div class="slot">?</div>
-                <div class="slot">?</div>
-            </div>
+                <div id="answer-board">
+                    <div class="slot">?</div>
+                    <div class="slot">?</div>
+                    <div class="slot">?</div>
+                </div>
 
-            <div class="hint-area" id="hint-display">
-                Hint | Select a level and begin!
+                <div class="hint-area" id="hint-display">
+                    Hint | Select a level and begin!
+                </div>
             </div>
 
             <div id="keyboard-display"></div>
@@ -313,7 +321,7 @@
         let vocabList = [];
         let currentLevel = 1;
         let targetWordObj = null; 
-        let userInput = ""; 
+        let userInput = ""; // 這字串代表「目前顯示在畫面上的所有字母」
         let isGameWon = false;
 
         const keys = ["QWERTYUIOP", "ASDFGHJKL", "ZXCVBNM"];
@@ -325,16 +333,14 @@
                 if (!response.ok) throw new Error("JSON load failed");
                 vocabList = await response.json();
             } catch (e) {
-                vocabList = [
-                    {"Vocabulary":"apple","PoS":"n.","Level":"1","Translation":"蘋果(測試用)"},
-                    {"Vocabulary":"success","PoS":"n.","Level":"1","Translation":"成功(測試用)"}
-                ];
+                vocabList = [{"Vocabulary":"apple","PoS":"n.","Level":"1","Translation":"蘋果(測試)"}];
             }
 
-            // 點擊卡片聚焦 (排除按鈕)
             document.querySelector('.game-card').addEventListener('click', (e) => {
                 if(e.target.tagName !== 'BUTTON' && targetWordObj && !isGameWon) {
-                    document.getElementById('hidden-input').focus();
+                    // 重新聚焦並把游標移到最後，防止手機鍵盤輸入問題
+                    const input = document.getElementById('hidden-input');
+                    input.focus();
                 }
             });
 
@@ -375,21 +381,17 @@
             
             userInput = "";
             isGameWon = false;
-            document.getElementById('hidden-input').value = "";
+            document.getElementById('hidden-input').value = ""; // 清空真實輸入框
             renderKeyboard(); 
             
             document.getElementById('hint-display').innerHTML = 
                 `Hint | <span class="hint-val">PoS: ${targetWordObj.PoS}</span> / <span class="hint-val">ZH: ${targetWordObj.Translation}</span>`;
 
-            // --- 智慧生成格子 (RWD 調整大小) ---
+            // RWD 格子生成
             const board = document.getElementById('answer-board');
             board.innerHTML = '';
             const len = targetWord.length;
-            
-            let boxSize = 44; 
-            let fontSize = 24;
-            
-            // 根據字數調整大小，避免太擠
+            let boxSize = 44; let fontSize = 24;
             if (len > 10) { boxSize = 30; fontSize = 16; }
             else if (len > 8) { boxSize = 36; fontSize = 20; }
             else if (len > 6) { boxSize = 40; fontSize = 22; }
@@ -407,43 +409,63 @@
             document.getElementById('hidden-input').focus();
         }
 
+        // --- 核心邏輯修改：鎖定輸入模式 ---
         function handleTyping(e) {
-            if (!targetWordObj || isGameWon) {
-                e.target.value = ""; 
-                return;
-            }
+            if (!targetWordObj || isGameWon) { e.target.value = ""; return; }
 
-            let val = e.target.value.replace(/[^a-zA-Z]/g, '').toLowerCase();
-            const maxLen = targetWordObj.Vocabulary.length;
-
-            if (val.length > maxLen) {
-                val = val.slice(0, maxLen);
-            }
+            // 1. 取得使用者最新打的那一個字
+            // 注意：因為我們每次都會重置 input value，所以 e.target.value 通常就是那個新字
+            // 但為了保險（有些手機輸入法會保留），我們取最後一個字
+            let rawInput = e.target.value.replace(/[^a-zA-Z]/g, '').toLowerCase();
             
-            e.target.value = val;
-            userInput = val;
+            if (rawInput.length === 0) return; // 沒打字或按了backspace
+
+            const lastChar = rawInput.slice(-1); // 拿到最新輸入的那個字母
+            const target = targetWordObj.Vocabulary.toLowerCase();
+            
+            // 2. 計算目前已經「鎖定」(Blue) 的字有幾個
+            // 我們把 userInput 和 target 比對，看前綴有幾個一樣
+            let correctCount = 0;
+            for(let i=0; i<userInput.length; i++) {
+                if (userInput[i] === target[i]) {
+                    correctCount++;
+                } else {
+                    break; // 一旦不一樣就停，代表這裡是被卡住的地方
+                }
+            }
+
+            // 3. 建構新的 userInput
+            // 邏輯：保留所有正確的前綴 + 加上最新的嘗試字母
+            // 這樣做到了「除非打對，否則永遠在修改同一格」的效果
+            if (correctCount < target.length) {
+                userInput = target.slice(0, correctCount) + lastChar;
+            }
+
+            // 4. 強制將真實輸入框設為 userInput (或清空)，
+            // 這裡選擇清空，因為我們自己維護了 userInput 狀態，
+            // 這樣可以避免手機預測字詞的干擾
+            e.target.value = userInput; 
 
             updateBoard();
-            checkWin(val);
+            checkWin(userInput);
         }
 
         function updateBoard() {
             const target = targetWordObj.Vocabulary.toLowerCase();
             const slots = document.querySelectorAll('.slot');
             
-            // 1. 計算目標單字中每個字母的總數
             const targetCharCounts = {};
             for(let c of target) targetCharCounts[c] = (targetCharCounts[c] || 0) + 1;
 
-            // 2. 計算使用者目前已經輸入了幾個該字母
             const userCharCounts = {};
             for(let c of userInput) userCharCounts[c] = (userCharCounts[c] || 0) + 1;
 
             for (let i = 0; i < target.length; i++) {
                 const slot = slots[i];
-                const letter = userInput[i];
+                const letter = userInput[i]; // 拿出目前的使用者輸入
 
                 slot.className = 'slot'; 
+                // 顯示邏輯：如果有輸入這個位置的字，就顯示，否則顯示問號
                 slot.innerText = letter ? letter.toUpperCase() : "?";
 
                 if (!letter) continue;
@@ -455,14 +477,9 @@
                 slot.classList.add(colorClass);
                 updateKeyboardColor(letter.toUpperCase(), colorClass);
 
-                // --- 新的虛線邏輯 ---
-                // 條件：
-                // 1. 這個字母在答案中出現超過1次 (需要提示)
-                // 2. 並且，使用者目前輸入這個字母的數量 < 答案中的總數量 (還沒找完)
-                // 3. 當前格子要是藍色或黃色 (已經顯示出來了)
+                // 虛線邏輯：總數 > 1 且 還沒打滿 且 當前顯示出來了
                 const totalInTarget = targetCharCounts[letter] || 0;
                 const totalTyped = userCharCounts[letter] || 0;
-
                 if (totalInTarget > 1 && totalTyped < totalInTarget && (colorClass === 'blue' || colorClass === 'yellow')) {
                     slot.classList.add('multi-occur');
                 }
@@ -477,14 +494,13 @@
                 
                 const slots = document.querySelectorAll('.slot');
                 
-                // 金色波浪
+                // 金色波浪特效 (強制白字)
                 slots.forEach((slot, index) => {
                     setTimeout(() => {
                         slot.classList.add('winner-anim');
                     }, index * 100);
                 });
 
-                // 顯示 Correct ✅
                 setTimeout(() => {
                      document.getElementById('hint-display').innerHTML = 
                      `<span style="color:var(--win-gold); font-weight:bold; font-size:1.3rem; text-shadow:0 0 10px rgba(255,215,0,0.5);">Correct ✅</span>`;
