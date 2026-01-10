@@ -10,14 +10,12 @@
 
     <style>
         :root {
-            /* 顏色變數 */
             --bg-body: #12141a;
             --card-bg: #1e232e;
             --slot-empty: #2b3240;
-            --modal-bg: rgba(0, 0, 0, 0.85); /* 遮罩背景 */
-            --modal-card: #252a36; /* 教學卡片背景 */
+            --modal-bg: rgba(0, 0, 0, 0.85);
+            --modal-card: #252a36;
             
-            /* 狀態色 */
             --blue: #3b82f6;
             --blue-glow: rgba(59, 130, 246, 0.6);
             --yellow: #eab308;
@@ -29,7 +27,6 @@
             --text-gray: #94a3b8;
             --text-highlight: #60a5fa;
 
-            /* 勝利金色 */
             --win-gold: #FFD700;
             --win-glow: rgba(255, 215, 0, 0.6);
         }
@@ -42,6 +39,7 @@
             background-color: var(--bg-body);
             color: var(--text-white);
             font-family: 'Roboto', sans-serif;
+            /* 關鍵佈局：全螢幕 Grid，分為「主畫面」與「Footer」 */
             height: 100dvh;
             display: grid;
             grid-template-rows: 1fr auto; 
@@ -50,13 +48,14 @@
 
         /* --- 上半部：遊戲主區 --- */
         .main-area {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 10px;
+            position: relative;
             width: 100%;
             height: 100%;
-            overflow: hidden;
+            display: flex;
+            align-items: center;     /* 垂直置中 */
+            justify-content: center; /* 水平置中 */
+            padding: 10px;
+            overflow: hidden; /* 防止內容溢出 */
         }
 
         /* --- 卡片本體 --- */
@@ -64,17 +63,23 @@
             background-color: var(--card-bg);
             width: 95%;
             max-width: 420px;
-            max-height: 100%; 
+            
+            /* 這裡實現你的「長寬政策」：
+               卡片高度最多佔滿 main-area，如果螢幕太扁，它會自動縮小內容間距，
+               而不是長出卷軸。使用 flex 佈局來分配內部空間。 */
+            height: auto;
+            max-height: 100%;
+            
             padding: 20px;
             border-radius: 24px;
             box-shadow: 0 15px 40px rgba(0,0,0,0.6);
+            
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: center;
-            position: relative;
+            justify-content: space-between; /* 均勻分佈內容 */
+            
             animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            overflow-y: auto; 
         }
 
         @keyframes popIn {
@@ -85,7 +90,7 @@
         h1 {
             font-family: 'Orbitron', sans-serif;
             margin: 0 0 10px 0;
-            font-size: 1.6rem;
+            font-size: clamp(1.4rem, 4vh, 1.8rem); /* 隨高度動態調整字體 */
             letter-spacing: 2px;
             text-align: center;
             background: linear-gradient(to right, #fff, #a5b4fc);
@@ -98,35 +103,30 @@
         #answer-board {
             display: flex;
             gap: 6px;
-            margin-bottom: 8px;
+            margin: 10px 0;
             justify-content: center;
             flex-wrap: wrap;
             width: 100%;
-            min-height: 50px;
             flex-shrink: 0;
         }
 
         .slot {
-            width: 44px;
-            height: 52px;
+            width: 44px; height: 52px; /* JS 會覆蓋 */
             background-color: var(--slot-empty);
             border-radius: 8px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
+            display: flex; justify-content: center; align-items: center;
             font-family: 'Orbitron', sans-serif;
-            font-size: 24px;
-            font-weight: 700;
+            font-size: 24px; font-weight: 700;
             color: var(--text-white);
             border: 2px solid transparent;
-            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: all 0.1s;
             text-transform: uppercase;
             box-shadow: 0 4px 6px rgba(0,0,0,0.2);
         }
 
         .slot.blue { background-color: var(--blue); border-color: rgba(255,255,255,0.2); }
         .slot.yellow { background-color: var(--yellow); color: #1e232e; } 
-        .slot.red { background-color: var(--red-bg); opacity: 0.7; }
+        .slot.red { background-color: var(--red-bg); opacity: 0.8; }
         .slot.multi-occur { border: 2px dashed rgba(255, 255, 255, 0.8) !important; }
 
         @keyframes winner-jump {
@@ -143,13 +143,14 @@
         }
 
         .hint-area {
-            font-size: 0.8rem;
+            font-size: 0.85rem;
             color: var(--text-gray);
             margin-bottom: 10px;
             text-align: center;
             line-height: 1.4;
-            min-height: 2.2em;
+            min-height: 2.4em;
             flex-shrink: 0;
+            display: flex; flex-direction: column; justify-content: center;
         }
         .hint-val { color: var(--text-highlight); font-weight: bold; }
 
@@ -158,9 +159,9 @@
             display: flex;
             flex-direction: column;
             gap: 5px;
-            margin-bottom: 10px; /* 縮小一點給教學按鈕空間 */
+            margin-bottom: 10px;
             width: 100%;
-            flex-shrink: 1;
+            flex-shrink: 1; /* 空間不夠時可以稍微壓縮 */
         }
         
         .kb-row { display: flex; justify-content: center; gap: 4px; width: 100%; }
@@ -173,6 +174,11 @@
             font-size: 13px; font-weight: bold; color: #718096;
             transition: background-color 0.2s;
         }
+        /* 讓鍵盤高度隨螢幕高度縮放 */
+        @media (max-height: 600px) {
+            .kb-key { height: 32px; }
+            .slot { height: 40px !important; width: 34px !important; font-size: 18px !important; }
+        }
 
         .kb-key.active-blue { background-color: var(--blue); color: white; }
         .kb-key.active-yellow { background-color: var(--yellow); color: #1e232e; }
@@ -183,11 +189,12 @@
             width: 100%;
             display: flex;
             flex-direction: column;
-            gap: 10px;
+            gap: 8px;
             margin-top: auto;
+            flex-shrink: 0;
         }
 
-        /* --- 新增：教學按鈕 --- */
+        /* --- Tutorial 按鈕 --- */
         #tutorial-btn {
             background: transparent;
             border: 1px solid #475569;
@@ -199,13 +206,14 @@
             width: 100%;
             text-align: center;
             transition: all 0.2s;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 5px;
+            display: flex; justify-content: center; align-items: center; gap: 8px;
+            font-family: 'Orbitron', sans-serif;
+            letter-spacing: 1px;
         }
         #tutorial-btn:hover { background: rgba(255,255,255,0.05); color: white; border-color: #64748b; }
-        #tutorial-btn::before { content: "ℹ️"; filter: grayscale(100%); }
+        
+        /* 你的要求：圖示換成 📜 */
+        #tutorial-btn::before { content: "📜"; font-size: 1rem; }
 
         .level-select {
             display: grid;
@@ -218,7 +226,7 @@
             background-color: transparent;
             border: 1px solid #334155;
             color: #64748b;
-            padding: 8px 0;
+            padding: 10px 0;
             border-radius: 8px;
             font-size: 0.85rem;
             font-weight: bold;
@@ -250,13 +258,14 @@
         #begin-btn:active { transform: scale(0.98); }
 
         footer {
-            padding: 15px 10px;
+            padding: 10px 10px 20px 10px; /* 底部留白 */
             text-align: center;
             color: #475569;
             font-size: 0.65rem;
             line-height: 1.5;
             background-color: var(--bg-body);
             z-index: 10;
+            flex-shrink: 0; /* 確保 footer 不會被壓扁 */
         }
 
         #hidden-input { position: absolute; opacity: 0; top: -9999px; }
@@ -270,8 +279,7 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            opacity: 0;
-            pointer-events: none;
+            opacity: 0; pointer-events: none;
             transition: opacity 0.3s;
         }
         .modal.show { opacity: 1; pointer-events: auto; }
@@ -279,7 +287,7 @@
         .modal-content {
             background-color: var(--modal-card);
             width: 85%; max-width: 380px;
-            max-height: 80vh;
+            max-height: 90vh;
             border-radius: 20px;
             padding: 25px;
             overflow-y: auto;
@@ -294,6 +302,7 @@
             margin-bottom: 20px;
             text-align: center;
             color: var(--blue);
+            letter-spacing: 1px;
         }
 
         .tutorial-step { margin-bottom: 20px; }
@@ -303,12 +312,16 @@
         .color-legend { display: flex; flex-direction: column; gap: 12px; margin-top: 10px; }
         .legend-row { display: flex; align-items: center; gap: 15px; }
         .legend-desc { font-size: 0.85rem; color: #cbd5e1; }
+        
+        /* 說明文字的顏色 Helper */
+        .txt-blue { color: var(--blue); font-weight: bold; }
+        .txt-yellow { color: var(--yellow); font-weight: bold; }
+        .txt-red { color: var(--red); font-weight: bold; }
 
-        /* 強制教學裡的小方塊樣式 */
+        /* Demo Slot 強制顏色樣式 */
         .demo-slot {
             width: 40px; height: 48px;
             font-size: 20px; flex-shrink: 0;
-            /* 繼承 slot 的基本樣式 */
             background-color: var(--slot-empty);
             border-radius: 8px;
             display: flex; justify-content: center; align-items: center;
@@ -316,17 +329,20 @@
             text-transform: uppercase; color: white;
             border: 2px solid transparent;
         }
+        /* 確保在 Modal 裡面顏色能顯示 */
+        .demo-slot.blue { background-color: var(--blue) !important; }
+        .demo-slot.yellow { background-color: var(--yellow) !important; color: #1e232e !important; }
+        .demo-slot.red { background-color: var(--red-bg) !important; opacity: 1 !important; }
+        .demo-slot.multi-occur { border: 2px dashed rgba(255, 255, 255, 0.9) !important; }
 
         .close-modal-btn {
             background: #334155;
             color: white; border: none;
-            padding: 10px; width: 100%;
+            padding: 12px; width: 100%;
             border-radius: 10px;
-            margin-top: 20px;
+            margin-top: 10px;
             font-weight: bold; cursor: pointer;
         }
-        .close-modal-btn:hover { background: #475569; }
-
     </style>
 </head>
 <body>
@@ -348,7 +364,7 @@
             <div id="keyboard-display"></div>
 
             <div class="control-group">
-                <button id="tutorial-btn" onclick="openTutorial()">How to Play</button>
+                <button id="tutorial-btn" onclick="openTutorial()">TUTORIAL</button>
 
                 <div class="level-select">
                     <button class="lvl-btn selected" onclick="selectLevel(1)">Lv. 1</button>
@@ -374,12 +390,16 @@
             
             <div class="tutorial-step">
                 <span class="step-title">1. Start Game</span>
-                <span class="step-desc">Select a difficulty level and press <b>BEGIN</b>. A hint (Part of Speech & Translation) will appear.</span>
+                <span class="step-desc">Select a difficulty level and press <b>BEGIN</b>. A hint will appear.</span>
             </div>
 
             <div class="tutorial-step">
-                <span class="step-title">2. Typing</span>
-                <span class="step-desc">Tap the <b>? Boxes</b> above to open your keyboard. Type the word you guess.</span>
+                <span class="step-title">2. Lock-in Typing</span>
+                <div class="legend-row" style="margin: 10px 0;">
+                    <div class="demo-slot">?</div>
+                    <span class="legend-desc">Tap the <b>? Boxes</b> to open keyboard.</span>
+                </div>
+                <span class="step-desc">You must find the correct letter to turn the box <b>BLUE</b> before moving to the next box!</span>
             </div>
 
             <div class="tutorial-step">
@@ -388,28 +408,28 @@
                     
                     <div class="legend-row">
                         <div class="demo-slot blue">A</div>
-                        <span class="legend-desc"><b>Blue:</b> Correct letter in the Correct spot.</span>
+                        <span class="legend-desc"><span class="txt-blue">Blue</span>: Correct letter! Input moves to next box.</span>
                     </div>
 
                     <div class="legend-row">
                         <div class="demo-slot yellow">B</div>
-                        <span class="legend-desc"><b>Yellow:</b> Correct letter but in the Wrong spot.</span>
+                        <span class="legend-desc"><span class="txt-yellow">Yellow</span>: This letter is in the word, but NOT here. Try again!</span>
                     </div>
 
                     <div class="legend-row">
                         <div class="demo-slot red">C</div>
-                        <span class="legend-desc"><b>Red:</b> This letter is not in the word.</span>
+                        <span class="legend-desc"><span class="txt-red">Red</span>: This letter is not in the word at all.</span>
                     </div>
 
                     <div class="legend-row">
                         <div class="demo-slot blue multi-occur">E</div>
-                        <span class="legend-desc"><b>Dashed Line:</b> This letter appears more than once in the word! (Line disappears when you find all of them).</span>
+                        <span class="legend-desc"><b>Dashed Line</b>: This letter appears more than once! (Line disappears when you find them all).</span>
                     </div>
 
                 </div>
             </div>
 
-            <button class="close-modal-btn" onclick="closeTutorial()">Got it!</button>
+            <button class="close-modal-btn" onclick="closeTutorial()">GOT IT</button>
         </div>
     </div>
 
@@ -419,7 +439,11 @@
         let vocabList = [];
         let currentLevel = 1;
         let targetWordObj = null; 
-        let userInput = ""; 
+        
+        // 核心變數修改：不再是一次打完，而是分段紀錄
+        let correctPrefix = "";   // 已經答對並鎖定的部分 (全部是藍色)
+        let currentGuessChar = ""; // 當前正在嘗試的那個字母 (可能是紅/黃)
+        
         let isGameWon = false;
 
         const keys = ["QWERTYUIOP", "ASDFGHJKL", "ZXCVBNM"];
@@ -431,39 +455,26 @@
                 if (!response.ok) throw new Error("JSON load failed");
                 vocabList = await response.json();
             } catch (e) {
-                vocabList = [{"Vocabulary":"apple","PoS":"n.","Level":"1","Translation":"蘋果(測試)"}];
+                vocabList = [{"Vocabulary":"apple","PoS":"n.","Level":"1","Translation":"蘋果"}];
             }
 
-            // 點擊卡片聚焦 (排除按鈕)
             document.querySelector('.game-card').addEventListener('click', (e) => {
-                // 如果是點到教學按鈕，不聚焦輸入框
                 if (e.target.closest('#tutorial-btn')) return;
-
                 if(e.target.tagName !== 'BUTTON' && targetWordObj && !isGameWon) {
                     document.getElementById('hidden-input').focus();
                 }
             });
 
-            // 點擊 Modal 外部關閉
             document.getElementById('tutorial-modal').addEventListener('click', (e) => {
-                if(e.target === document.getElementById('tutorial-modal')) {
-                    closeTutorial();
-                }
+                if(e.target === document.getElementById('tutorial-modal')) closeTutorial();
             });
 
             document.getElementById('hidden-input').addEventListener('input', handleTyping);
         };
 
-        // --- Tutorial Functions ---
-        function openTutorial() {
-            document.getElementById('tutorial-modal').classList.add('show');
-        }
+        function openTutorial() { document.getElementById('tutorial-modal').classList.add('show'); }
+        function closeTutorial() { document.getElementById('tutorial-modal').classList.remove('show'); }
 
-        function closeTutorial() {
-            document.getElementById('tutorial-modal').classList.remove('show');
-        }
-
-        // --- Game Logic ---
         function renderKeyboard() {
             const kbContainer = document.getElementById('keyboard-display');
             kbContainer.innerHTML = '';
@@ -494,9 +505,10 @@
             if (pool.length === 0) { alert(`Level ${currentLevel} 沒單字！`); return; }
 
             targetWordObj = pool[Math.floor(Math.random() * pool.length)];
-            const targetWord = targetWordObj.Vocabulary;
             
-            userInput = "";
+            // 重置遊戲狀態
+            correctPrefix = "";
+            currentGuessChar = "";
             isGameWon = false;
             document.getElementById('hidden-input').value = "";
             renderKeyboard(); 
@@ -506,8 +518,9 @@
 
             const board = document.getElementById('answer-board');
             board.innerHTML = '';
-            const len = targetWord.length;
+            const len = targetWordObj.Vocabulary.length;
             
+            // RWD 格子大小調整
             let boxSize = 44; let fontSize = 24;
             if (len > 10) { boxSize = 30; fontSize = 16; }
             else if (len > 8) { boxSize = 36; fontSize = 20; }
@@ -526,72 +539,142 @@
             document.getElementById('hidden-input').focus();
         }
 
+        // --- 新的輸入邏輯：鎖定式 ---
         function handleTyping(e) {
             if (!targetWordObj || isGameWon) {
                 e.target.value = ""; return;
             }
-            let val = e.target.value.replace(/[^a-zA-Z]/g, '').toLowerCase();
-            const maxLen = targetWordObj.Vocabulary.length;
-            if (val.length > maxLen) val = val.slice(0, maxLen);
-            e.target.value = val;
-            userInput = val;
+
+            // 取得最後輸入的一個字元 (因為手機可能會一次噴出一串，我們只取最後一個)
+            let rawInput = e.target.value;
+            if (rawInput.length === 0) return; // 刪除鍵不管它
+            
+            let char = rawInput.slice(-1).toLowerCase(); // 只看最後打的那個字
+            if (!/[a-z]/.test(char)) {
+                e.target.value = ""; return;
+            }
+
+            const targetWord = targetWordObj.Vocabulary.toLowerCase();
+            const currentIndex = correctPrefix.length; // 我們現在要解鎖的格子的 index
+
+            if (currentIndex >= targetWord.length) return; // 已經打完了
+
+            const targetChar = targetWord[currentIndex];
+
+            if (char === targetChar) {
+                // 答對了！
+                correctPrefix += char;
+                currentGuessChar = ""; // 清空當前猜測，準備下一格
+                
+                // 檢查是否全對
+                if (correctPrefix === targetWord) {
+                    doWin();
+                }
+            } else {
+                // 答錯了，只更新當前顯示，不推進
+                currentGuessChar = char;
+            }
+
+            // 清空 input 讓下一次輸入還是單純的字元偵測
+            e.target.value = ""; 
+            
             updateBoard();
-            checkWin(val);
         }
 
         function updateBoard() {
             const target = targetWordObj.Vocabulary.toLowerCase();
             const slots = document.querySelectorAll('.slot');
+            
+            // 計算目標總數 (為了虛線)
             const targetCharCounts = {};
             for(let c of target) targetCharCounts[c] = (targetCharCounts[c] || 0) + 1;
-            const userCharCounts = {};
-            for(let c of userInput) userCharCounts[c] = (userCharCounts[c] || 0) + 1;
+            
+            // 計算目前已鎖定的數量
+            const prefixCharCounts = {};
+            for(let c of correctPrefix) prefixCharCounts[c] = (prefixCharCounts[c] || 0) + 1;
 
             for (let i = 0; i < target.length; i++) {
                 const slot = slots[i];
-                const letter = userInput[i];
-                slot.className = 'slot'; 
-                slot.innerText = letter ? letter.toUpperCase() : "?";
-                if (!letter) continue;
+                let displayChar = "";
+                let colorClass = "";
+                
+                // 狀態 1: 已經鎖定的 (Blue)
+                if (i < correctPrefix.length) {
+                    displayChar = correctPrefix[i];
+                    colorClass = "blue";
+                } 
+                // 狀態 2: 正在猜的這一格 (Yellow / Red)
+                else if (i === correctPrefix.length && currentGuessChar !== "") {
+                    displayChar = currentGuessChar;
+                    // 判斷黃/紅
+                    if (target.includes(currentGuessChar)) {
+                        colorClass = "yellow"; // 有這個字但位置不對 (因為如果位置對了就會進 correctPrefix)
+                    } else {
+                        colorClass = "red";
+                    }
+                } 
+                // 狀態 3: 還沒到的 (問號)
+                else {
+                    displayChar = "?";
+                    colorClass = ""; // 素色
+                }
 
-                let colorClass = 'red';
-                if (letter === target[i]) colorClass = 'blue';
-                else if (target.includes(letter)) colorClass = 'yellow';
+                // 更新畫面
+                slot.className = 'slot'; // Reset
+                slot.innerText = displayChar === "?" ? "?" : displayChar.toUpperCase();
+                
+                if (colorClass) {
+                    slot.classList.add(colorClass);
+                    updateKeyboardColor(displayChar.toUpperCase(), colorClass);
+                }
 
-                slot.classList.add(colorClass);
-                updateKeyboardColor(letter.toUpperCase(), colorClass);
+                // 虛線邏輯 (只針對已經鎖定或正在顯示的字)
+                if (displayChar !== "?" && colorClass !== "red") {
+                    const charCountInTarget = targetCharCounts[displayChar];
+                    
+                    // 注意：這裡計算「已找到數量」要包含 correctPrefix 裡的 + currentGuessChar (如果是黃色的話)
+                    let foundCount = prefixCharCounts[displayChar] || 0;
+                    if (i === correctPrefix.length && currentGuessChar === displayChar) {
+                        foundCount += 1;
+                    }
 
-                const totalInTarget = targetCharCounts[letter] || 0;
-                const totalTyped = userCharCounts[letter] || 0;
-                if (totalInTarget > 1 && totalTyped < totalInTarget && (colorClass === 'blue' || colorClass === 'yellow')) {
-                    slot.classList.add('multi-occur');
+                    // 規則：字母總數 > 1 且 還沒全部找到 -> 顯示虛線
+                    if (charCountInTarget > 1 && foundCount < charCountInTarget) {
+                        slot.classList.add('multi-occur');
+                    }
                 }
             }
         }
 
-        function checkWin(currentInput) {
-            const target = targetWordObj.Vocabulary.toLowerCase();
-            if (currentInput === target) {
-                isGameWon = true;
-                document.getElementById('hidden-input').blur();
-                const slots = document.querySelectorAll('.slot');
-                slots.forEach((slot, index) => {
-                    setTimeout(() => { slot.classList.add('winner-anim'); }, index * 100);
-                });
-                setTimeout(() => {
-                     document.getElementById('hint-display').innerHTML = 
-                     `<span style="color:var(--win-gold); font-weight:bold; font-size:1.3rem; text-shadow:0 0 10px rgba(255,215,0,0.5);">Correct ✅</span>`;
-                }, 200);
-            }
+        function doWin() {
+            isGameWon = true;
+            document.getElementById('hidden-input').blur();
+            const slots = document.querySelectorAll('.slot');
+            slots.forEach((slot, index) => {
+                setTimeout(() => { slot.classList.add('winner-anim'); }, index * 100);
+            });
+            setTimeout(() => {
+                    document.getElementById('hint-display').innerHTML = 
+                    `<span style="color:var(--win-gold); font-weight:bold; font-size:1.3rem; text-shadow:0 0 10px rgba(255,215,0,0.5);">Correct ✅</span>`;
+            }, 200);
         }
 
         function updateKeyboardColor(char, type) {
             const keyEl = document.getElementById('key-' + char);
             if (!keyEl) return;
-            if (keyEl.classList.contains('active-blue')) return;
-            if (keyEl.classList.contains('active-yellow') && type !== 'blue') return;
-            keyEl.classList.remove('active-blue', 'active-yellow', 'active-red');
-            keyEl.classList.add('active-' + type);
+            // 狀態機：Blue > Yellow > Red > Default
+            if (keyEl.classList.contains('active-blue')) return; // 藍色無敵
+            
+            if (type === 'blue') {
+                keyEl.className = 'kb-key active-blue'; // 強制變藍
+            } else if (type === 'yellow') {
+                if (!keyEl.classList.contains('active-blue')) keyEl.className = 'kb-key active-yellow';
+            } else if (type === 'red') {
+                // 如果是紅色，只有在原本沒顏色的情況下才變紅 (避免蓋掉之前的黃)
+                if (!keyEl.classList.contains('active-blue') && !keyEl.classList.contains('active-yellow')) {
+                    keyEl.className = 'kb-key active-red';
+                }
+            }
         }
     </script>
 </body>
