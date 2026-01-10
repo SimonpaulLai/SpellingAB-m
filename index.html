@@ -11,23 +11,25 @@
     <style>
         :root {
             /* 顏色變數 */
-            --bg-body: #12141a;       /* 更深邃的背景 */
-            --card-bg: #1e232e;       /* 卡片本體 */
-            --slot-empty: #2b3240;    /* 空格底色 */
+            --bg-body: #12141a;
+            --card-bg: #1e232e;
+            --slot-empty: #2b3240;
             
             /* 狀態色 */
             --blue: #3b82f6;
             --blue-glow: rgba(59, 130, 246, 0.6);
             --yellow: #eab308;
             --red: #ef4444;
+            --red-bg: #dc2626;
             --btn-red: #c53c33;
             
             --text-white: #ffffff;
             --text-gray: #94a3b8;
             --text-highlight: #60a5fa;
 
-            /* 勝利綠色 */
-            --win-green: #10b981;
+            /* 勝利金色 */
+            --win-gold: #FFD700;
+            --win-glow: rgba(255, 215, 0, 0.6);
         }
 
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
@@ -38,31 +40,49 @@
             background-color: var(--bg-body);
             color: var(--text-white);
             font-family: 'Roboto', sans-serif;
-            height: 100dvh; /* 使用 dynamic viewport height */
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
+            
+            /* 關鍵佈局：佔滿螢幕，分為「主內容(1fr)」與「Footer(auto)」 */
+            height: 100dvh;
+            display: grid;
+            grid-template-rows: 1fr auto; 
             overflow: hidden;
         }
 
-        /* --- 主卡片 (RWD核心) --- */
+        /* --- 上半部：遊戲主區 --- */
+        .main-area {
+            display: flex;
+            align-items: center;     /* 垂直置中 */
+            justify-content: center; /* 水平置中 */
+            padding: 10px;
+            width: 100%;
+            height: 100%;
+            overflow: hidden; /* 防止內容撐開導致 Footer 跑掉 */
+        }
+
+        /* --- 卡片本體 --- */
         .game-card {
             background-color: var(--card-bg);
-            /* 寬度設定：手機上佔 92%，但在大螢幕上不超過 420px */
-            width: 92%; 
+            
+            /* 讓卡片盡可能大，但留有呼吸空間 */
+            width: 95%;
             max-width: 420px;
-            /* 高度自適應，但給一點 padding */
-            padding: 24px 20px;
-            border-radius: 24px; /* 更圓潤的角 */
-            box-shadow: 0 20px 50px rgba(0,0,0,0.6);
+            /* 高度限制：不要超過父容器的高度 (也就是扣除 footer 後的高度) */
+            max-height: 100%; 
+            
+            padding: 20px;
+            border-radius: 24px;
+            box-shadow: 0 15px 40px rgba(0,0,0,0.6);
             
             display: flex;
             flex-direction: column;
             align-items: center;
+            justify-content: center; /* 內容垂直分佈 */
+            
             position: relative;
-            /* 稍微縮小的動畫效果 (進場時) */
             animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            
+            /* 讓內容如果真的太長可以捲動，但在手機上通常設計為剛好塞滿 */
+            overflow-y: auto; 
         }
 
         @keyframes popIn {
@@ -73,39 +93,39 @@
         /* --- 標題 --- */
         h1 {
             font-family: 'Orbitron', sans-serif;
-            margin: 0 0 15px 0;
-            font-size: 1.8rem;
+            margin: 0 0 10px 0;
+            font-size: 1.6rem;
             letter-spacing: 2px;
             text-align: center;
             background: linear-gradient(to right, #fff, #a5b4fc);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
+            flex-shrink: 0; /* 防止標題被壓縮 */
         }
 
-        /* --- 答案框框區 (Layout 核心) --- */
+        /* --- 答案框框區 --- */
         #answer-board {
             display: flex;
-            gap: 8px; /* 格子間距 */
-            margin-bottom: 12px;
-            justify-content: center; /* 確保換行時置中 */
-            flex-wrap: wrap; /* 允許換行 */
+            gap: 6px;
+            margin-bottom: 8px;
+            justify-content: center;
+            flex-wrap: wrap;
             width: 100%;
-            min-height: 60px;
-            padding: 0 5px; /* 防止太貼邊 */
+            min-height: 50px;
+            flex-shrink: 0;
         }
 
         .slot {
-            /* 預設大小，會被 JS 動態調整 */
-            width: 48px; 
-            height: 56px;
+            width: 44px; /* 預設，JS會改 */
+            height: 52px;
             background-color: var(--slot-empty);
-            border-radius: 10px;
+            border-radius: 8px;
             display: flex;
             justify-content: center;
             align-items: center;
             
             font-family: 'Orbitron', sans-serif;
-            font-size: 26px;
+            font-size: 24px;
             font-weight: 700;
             color: var(--text-white);
             
@@ -113,20 +133,17 @@
             transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
             text-transform: uppercase;
             box-shadow: 0 4px 6px rgba(0,0,0,0.2);
-            
-            /* 防止縮得太扁 */
-            flex-shrink: 0; 
         }
 
         /* 狀態顏色 */
-        .slot.blue { background-color: var(--blue); box-shadow: 0 0 15px var(--blue-glow); border-color: rgba(255,255,255,0.2); }
-        .slot.yellow { background-color: var(--yellow); color: #1e232e; } /* 黃底黑字對比高 */
+        .slot.blue { background-color: var(--blue); border-color: rgba(255,255,255,0.2); }
+        .slot.yellow { background-color: var(--yellow); color: #1e232e; } 
         .slot.red { background-color: var(--red-bg); opacity: 0.7; }
         
-        /* 白色虛線 (重複字母) */
+        /* 虛線框 (提示還有更多) */
         .slot.multi-occur { border: 2px dashed rgba(255, 255, 255, 0.8) !important; }
 
-        /* --- 勝利特效 (波浪跳動) --- */
+        /* --- 勝利特效 (金色跳動) --- */
         @keyframes winner-jump {
             0%, 100% { transform: translateY(0); }
             50% { transform: translateY(-10px); }
@@ -134,29 +151,32 @@
         
         .slot.winner-anim {
             animation: winner-jump 0.6s ease;
-            background-color: var(--win-green) !important; /* 勝利轉綠 */
-            box-shadow: 0 0 20px var(--win-green);
+            background-color: var(--win-gold) !important; /* 金色 */
+            color: #1e232e !important; /* 金底黑字 */
+            box-shadow: 0 0 25px var(--win-glow);
             border-color: #fff !important;
         }
 
         /* --- Hint --- */
         .hint-area {
-            font-size: 0.85rem;
+            font-size: 0.8rem;
             color: var(--text-gray);
-            margin-bottom: 20px;
+            margin-bottom: 15px;
             text-align: center;
-            line-height: 1.5;
-            min-height: 2.5em; /* 預留兩行高度防止跳動 */
+            line-height: 1.4;
+            min-height: 2.2em;
+            flex-shrink: 0;
         }
         .hint-val { color: var(--text-highlight); font-weight: bold; }
 
-        /* --- 鍵盤顯示板 (填滿寬度) --- */
+        /* --- 鍵盤顯示板 --- */
         #keyboard-display {
             display: flex;
             flex-direction: column;
-            gap: 6px;
-            margin-bottom: 20px;
-            width: 100%; /* 填滿卡片 */
+            gap: 5px;
+            margin-bottom: 15px;
+            width: 100%;
+            flex-shrink: 1; /* 允許鍵盤在高度不夠時稍微壓縮間距(通常不會) */
         }
         
         .kb-row { 
@@ -167,15 +187,15 @@
         }
         
         .kb-key {
-            flex: 1; /* 每個按鍵平均分配寬度 */
-            max-width: 40px; /* 但不要太大 */
-            height: 42px;
+            flex: 1;
+            max-width: 38px;
+            height: 40px;
             background-color: var(--slot-empty);
-            border-radius: 6px;
+            border-radius: 5px;
             display: flex;
             justify-content: center;
             align-items: center;
-            font-size: 14px;
+            font-size: 13px;
             font-weight: bold;
             color: #718096;
             transition: background-color 0.2s;
@@ -190,19 +210,13 @@
             width: 100%;
             display: flex;
             flex-direction: column;
-            gap: 12px;
-        }
-
-        .level-label {
-            font-size: 0.85rem;
-            color: #64748b;
-            text-align: center;
-            margin-bottom: -4px;
+            gap: 10px;
+            margin-top: auto; /* 推到底部 */
         }
 
         .level-select {
             display: grid;
-            grid-template-columns: repeat(3, 1fr); /* 固定3欄 */
+            grid-template-columns: repeat(3, 1fr);
             gap: 8px;
             width: 100%;
         }
@@ -211,9 +225,9 @@
             background-color: transparent;
             border: 1px solid #334155;
             color: #64748b;
-            padding: 10px 0;
+            padding: 8px 0;
             border-radius: 8px;
-            font-size: 0.9rem;
+            font-size: 0.85rem;
             font-weight: bold;
             cursor: pointer;
             transition: all 0.2s;
@@ -231,7 +245,7 @@
             background-color: var(--btn-red);
             color: white;
             border: none;
-            padding: 16px;
+            padding: 14px;
             font-size: 1.1rem;
             font-weight: 700;
             border-radius: 12px;
@@ -239,19 +253,18 @@
             font-family: 'Orbitron', sans-serif;
             letter-spacing: 1.5px;
             box-shadow: 0 4px 15px rgba(197, 60, 51, 0.4);
-            transition: transform 0.1s;
         }
         #begin-btn:active { transform: scale(0.98); }
 
-        /* --- Footer --- */
+        /* --- Footer (固定底部) --- */
         footer {
-            margin-top: 25px;
+            padding: 15px 10px;
             text-align: center;
             color: #475569;
             font-size: 0.65rem;
             line-height: 1.5;
-            width: 90%;
-            opacity: 0.7;
+            background-color: var(--bg-body); /* 確保背景一致 */
+            z-index: 10;
         }
 
         #hidden-input { position: absolute; opacity: 0; top: -9999px; }
@@ -259,32 +272,33 @@
 </head>
 <body>
 
-    <div class="game-card">
-        <h1>Spelling AB</h1>
+    <div class="main-area">
+        <div class="game-card">
+            <h1>Spelling AB</h1>
 
-        <div id="answer-board">
-            <div class="slot">?</div>
-            <div class="slot">?</div>
-            <div class="slot">?</div>
-        </div>
-
-        <div class="hint-area" id="hint-display">
-            Hint | Select a level and begin!
-        </div>
-
-        <div id="keyboard-display"></div>
-
-        <div class="control-group">
-            <div class="level-label">Select Challenge</div>
-            <div class="level-select">
-                <button class="lvl-btn selected" onclick="selectLevel(1)">Lv. 1</button>
-                <button class="lvl-btn" onclick="selectLevel(2)">Lv. 2</button>
-                <button class="lvl-btn" onclick="selectLevel(3)">Lv. 3</button>
-                <button class="lvl-btn" onclick="selectLevel(4)">Lv. 4</button>
-                <button class="lvl-btn" onclick="selectLevel(5)">Lv. 5</button>
-                <button class="lvl-btn" onclick="selectLevel(6)">Lv. 6</button>
+            <div id="answer-board">
+                <div class="slot">?</div>
+                <div class="slot">?</div>
+                <div class="slot">?</div>
             </div>
-            <button id="begin-btn" onclick="startGame()">BEGIN</button>
+
+            <div class="hint-area" id="hint-display">
+                Hint | Select a level and begin!
+            </div>
+
+            <div id="keyboard-display"></div>
+
+            <div class="control-group">
+                <div class="level-select">
+                    <button class="lvl-btn selected" onclick="selectLevel(1)">Lv. 1</button>
+                    <button class="lvl-btn" onclick="selectLevel(2)">Lv. 2</button>
+                    <button class="lvl-btn" onclick="selectLevel(3)">Lv. 3</button>
+                    <button class="lvl-btn" onclick="selectLevel(4)">Lv. 4</button>
+                    <button class="lvl-btn" onclick="selectLevel(5)">Lv. 5</button>
+                    <button class="lvl-btn" onclick="selectLevel(6)">Lv. 6</button>
+                </div>
+                <button id="begin-btn" onclick="startGame()">BEGIN</button>
+            </div>
         </div>
     </div>
 
@@ -300,7 +314,7 @@
         let currentLevel = 1;
         let targetWordObj = null; 
         let userInput = ""; 
-        let isGameWon = false; // 防止贏了之後還能打字
+        let isGameWon = false;
 
         const keys = ["QWERTYUIOP", "ASDFGHJKL", "ZXCVBNM"];
 
@@ -311,15 +325,13 @@
                 if (!response.ok) throw new Error("JSON load failed");
                 vocabList = await response.json();
             } catch (e) {
-                // 備用測試資料
                 vocabList = [
-                    {"Vocabulary":"apple","PoS":"n.","Level":"1","Translation":"蘋果"},
-                    {"Vocabulary":"beautiful","PoS":"adj.","Level":"1","Translation":"美麗的"},
-                    {"Vocabulary":"refrigerator","PoS":"n.","Level":"1","Translation":"冰箱"} // 測試長字換行
+                    {"Vocabulary":"apple","PoS":"n.","Level":"1","Translation":"蘋果(測試用)"},
+                    {"Vocabulary":"success","PoS":"n.","Level":"1","Translation":"成功(測試用)"}
                 ];
             }
 
-            // 點擊卡片任何地方聚焦
+            // 點擊卡片聚焦 (排除按鈕)
             document.querySelector('.game-card').addEventListener('click', (e) => {
                 if(e.target.tagName !== 'BUTTON' && targetWordObj && !isGameWon) {
                     document.getElementById('hidden-input').focus();
@@ -361,35 +373,32 @@
             targetWordObj = pool[Math.floor(Math.random() * pool.length)];
             const targetWord = targetWordObj.Vocabulary;
             
-            // 重置
             userInput = "";
             isGameWon = false;
             document.getElementById('hidden-input').value = "";
             renderKeyboard(); 
             
-            // 更新 UI
             document.getElementById('hint-display').innerHTML = 
                 `Hint | <span class="hint-val">PoS: ${targetWordObj.PoS}</span> / <span class="hint-val">ZH: ${targetWordObj.Translation}</span>`;
 
-            // --- 智慧生成格子 (Smart Scaling) ---
+            // --- 智慧生成格子 (RWD 調整大小) ---
             const board = document.getElementById('answer-board');
             board.innerHTML = '';
-            
             const len = targetWord.length;
             
-            // 根據單字長度調整格子大小，避免換行太醜
-            let boxSize = 48; // 預設大小
-            let fontSize = 26;
+            let boxSize = 44; 
+            let fontSize = 24;
             
-            if (len > 10) { boxSize = 32; fontSize = 18; }
-            else if (len > 8) { boxSize = 38; fontSize = 22; }
-            else if (len > 6) { boxSize = 42; fontSize = 24; }
+            // 根據字數調整大小，避免太擠
+            if (len > 10) { boxSize = 30; fontSize = 16; }
+            else if (len > 8) { boxSize = 36; fontSize = 20; }
+            else if (len > 6) { boxSize = 40; fontSize = 22; }
 
             for(let i=0; i<len; i++) {
                 const slot = document.createElement('div');
                 slot.className = 'slot';
                 slot.style.width = boxSize + 'px';
-                slot.style.height = (boxSize * 1.2) + 'px'; // 保持長方形比例
+                slot.style.height = (boxSize * 1.2) + 'px';
                 slot.style.fontSize = fontSize + 'px';
                 slot.innerText = "?";
                 board.appendChild(slot);
@@ -400,20 +409,17 @@
 
         function handleTyping(e) {
             if (!targetWordObj || isGameWon) {
-                e.target.value = ""; // 如果贏了或沒開始，清空輸入
+                e.target.value = ""; 
                 return;
             }
 
             let val = e.target.value.replace(/[^a-zA-Z]/g, '').toLowerCase();
             const maxLen = targetWordObj.Vocabulary.length;
 
-            // --- 核心：輸入鎖定 ---
-            // 如果超過長度，直接切斷，不讓它進去
             if (val.length > maxLen) {
                 val = val.slice(0, maxLen);
             }
             
-            // 寫回 input，確保游標和值都正確
             e.target.value = val;
             userInput = val;
 
@@ -424,17 +430,20 @@
         function updateBoard() {
             const target = targetWordObj.Vocabulary.toLowerCase();
             const slots = document.querySelectorAll('.slot');
+            
+            // 1. 計算目標單字中每個字母的總數
             const targetCharCounts = {};
             for(let c of target) targetCharCounts[c] = (targetCharCounts[c] || 0) + 1;
+
+            // 2. 計算使用者目前已經輸入了幾個該字母
+            const userCharCounts = {};
+            for(let c of userInput) userCharCounts[c] = (userCharCounts[c] || 0) + 1;
 
             for (let i = 0; i < target.length; i++) {
                 const slot = slots[i];
                 const letter = userInput[i];
 
-                slot.className = 'slot'; // Reset but keep custom size
-                // 重新加上自定義大小 (因為 className 覆蓋會洗掉 style 嗎？不會，style是inline的)
-                // 這裡不用重設 style，只需處理 class
-                
+                slot.className = 'slot'; 
                 slot.innerText = letter ? letter.toUpperCase() : "?";
 
                 if (!letter) continue;
@@ -446,32 +455,39 @@
                 slot.classList.add(colorClass);
                 updateKeyboardColor(letter.toUpperCase(), colorClass);
 
-                if (targetCharCounts[letter] > 1 && (colorClass === 'blue' || colorClass === 'yellow')) {
+                // --- 新的虛線邏輯 ---
+                // 條件：
+                // 1. 這個字母在答案中出現超過1次 (需要提示)
+                // 2. 並且，使用者目前輸入這個字母的數量 < 答案中的總數量 (還沒找完)
+                // 3. 當前格子要是藍色或黃色 (已經顯示出來了)
+                const totalInTarget = targetCharCounts[letter] || 0;
+                const totalTyped = userCharCounts[letter] || 0;
+
+                if (totalInTarget > 1 && totalTyped < totalInTarget && (colorClass === 'blue' || colorClass === 'yellow')) {
                     slot.classList.add('multi-occur');
                 }
             }
         }
 
-        // --- 勝利特效邏輯 ---
         function checkWin(currentInput) {
             const target = targetWordObj.Vocabulary.toLowerCase();
             if (currentInput === target) {
                 isGameWon = true;
-                document.getElementById('hidden-input').blur(); // 收起鍵盤
+                document.getElementById('hidden-input').blur();
                 
                 const slots = document.querySelectorAll('.slot');
                 
-                // 逐個觸發波浪動畫
+                // 金色波浪
                 slots.forEach((slot, index) => {
                     setTimeout(() => {
                         slot.classList.add('winner-anim');
-                    }, index * 100); // 每個延遲 100ms 造成波浪感
+                    }, index * 100);
                 });
 
-                // Hint 顯示恭喜
+                // 顯示 Correct ✅
                 setTimeout(() => {
                      document.getElementById('hint-display').innerHTML = 
-                     `<span style="color:var(--win-green); font-weight:bold; font-size:1.2rem;">CORRECT! 🎉</span>`;
+                     `<span style="color:var(--win-gold); font-weight:bold; font-size:1.3rem; text-shadow:0 0 10px rgba(255,215,0,0.5);">Correct ✅</span>`;
                 }, 200);
             }
         }
