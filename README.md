@@ -9,8 +9,7 @@
 A mobile-first, sci-fi themed English spelling puzzle game. Designed to feel like a native app with a "Cyberpunk" aesthetic.
 
 ## 🎮 Play Now
-**[點擊這裡開始遊玩 (Live Demo)](https://simonpaullai.github.io/spellingab-m/)**
-*(如果不正確，請將此連結替換為你實際的 GitHub Pages 網址)*
+**[點擊這裡開始遊玩 (Live Demo)](https://simonpaullai.github.io/SpellingAB-m/)**
 
 ---
 
